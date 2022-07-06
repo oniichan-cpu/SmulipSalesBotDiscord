@@ -1,7 +1,7 @@
 import os
 import asyncio
 import discord
-from discord.ext import commands
+from discord.ext import commands,tasks
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -75,40 +75,53 @@ def get_image(tokenId):
         images.append(img.get('src'))
     return images[0]
 
-
-async def my_background_task():
-    await client.wait_until_ready()
+@tasks.loop(seconds=10)
+async def sales():
     channel_id = config['channel_id']
     channel = client.get_channel(channel_id)
-    previous_sales = []
-    while not client.is_closed:
-        try:
-            meta = get_meta_from_mint()
-        except:
-            continue
+    try:
+        meta = get_meta_from_mint()
         new_sale = str(meta['id'])
-        if new_sale not in previous_sales:
-            usd = str(
-                round((get_current_price("ETH-" + config['fiat_currency']) * float(fixed_price(meta['pricePerItem']))),
-                      4))
-            eth = fixed_price(meta['pricePerItem'])
-            embed = discord.Embed(
-                colour=discord.Colour.blue(),
-                title=config['symbol'].capitalize() + "#" + str(meta['token']['tokenId']),
-                url="https://trove.treasure.lol/collection/" + config['symbol'].lower() + '/' + str(meta['token']['tokenId'])
-            )
-            embed.set_image(
-                url=get_image(meta['token']['tokenId']))
-            embed.set_thumbnail(
-                url=get_thumbnail())
-            embed.add_field(name="USD", value=usd + "$", inline=True)
-            embed.add_field(name="ETH", value=eth + "Ξ", inline=True)
-            embed.add_field(name="Buyer", value=meta['buyer']['id'], inline=False)
-            embed.add_field(name="Seller", value=meta['seller']['id'], inline=False)
-            embed.timestamp = datetime.datetime.utcnow()
-            embed.set_footer(text='\u200b')
-            previous_sales.append(str(meta['id']))
-            await channel.send(embed=embed)
-        await asyncio.sleep(20)
+    except:
+        pass
+    if new_sale not in previous_sales:
+        usd = str(
+            round((get_current_price("ETH-" + config['fiat_currency']) * float(fixed_price(meta['pricePerItem']))),
+                  4))
+        eth = fixed_price(meta['pricePerItem'])
+        embed = discord.Embed(
+            colour=discord.Colour.blue(),
+            title=config['symbol'].capitalize() + "#" + str(meta['token']['tokenId']),
+            url="https://trove.treasure.lol/collection/" + config['symbol'].lower() + '/' + str(
+                meta['token']['tokenId'])
+        )
+        embed.set_image(
+            url=get_image(meta['token']['tokenId']))
+        embed.set_thumbnail(
+            url=get_thumbnail())
+        embed.add_field(name="USD", value=usd + "$", inline=True)
+        embed.add_field(name="ETH", value=eth + "Ξ", inline=True)
+        embed.add_field(name="Buyer", value=meta['buyer']['id'], inline=False)
+        embed.add_field(name="Seller", value=meta['seller']['id'], inline=False)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_footer(text='\u200b')
+        previous_sales.append(str(meta['id']))
+        await channel.send(embed=embed)
+
+@client.event
+async def on_ready():
+    global previous_sales
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('------')
+    previous_sales = []
+    try:
+        meta = get_meta_from_mint()
+        new_sale = str(meta['id'])
+    except:
+        pass
+
+    sales.start()
 
 client.run(os.environ["DISCORD_TOKEN"])

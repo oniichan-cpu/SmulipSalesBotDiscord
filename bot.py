@@ -1,5 +1,5 @@
 import os
-import time
+import asyncio
 import discord
 from discord.ext import commands
 import json
@@ -76,12 +76,12 @@ def get_image(tokenId):
     return images[0]
 
 
-@client.command()
-async def new_sales(ctx):
+async def my_background_task():
+    await client.wait_until_ready()
     channel_id = config['channel_id']
     channel = client.get_channel(channel_id)
     previous_sales = []
-    while True:
+    while not client.is_closed:
         try:
             meta = get_meta_from_mint()
         except:
@@ -109,6 +109,6 @@ async def new_sales(ctx):
             embed.set_footer(text='\u200b')
             previous_sales.append(str(meta['id']))
             await channel.send(embed=embed)
-        time.sleep(10)
+        await asyncio.sleep(20)
 
 client.run(os.environ["DISCORD_TOKEN"])

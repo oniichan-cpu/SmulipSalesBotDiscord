@@ -1,0 +1,14 @@
+{
+  "symbol": "SMULIPS",
+  "discord_credentials": {
+    "discord_token": "ODYwOTA0MTk1Mjc5MDI4MjQ1.Gcwdzp.iQa0rVZuInJ_G7HBogBydZxlha5PjY1X2oCkb0"
+  },
+  "channel_id" : 744107902587109401,
+  "collection": "0xdabf2de52037b517097fd999c173c447784806b2",
+  "tweet_text": "[-n] #[-t] \nSold for\n[-f]\n[-p]\n\n[-l]\n\n#smulips #trovebytreasure",
+  "fiat_currency": "USD",
+  "TPS": 2,
+  "refresh_delay": 0.1,
+  "activities_per_call": 1000,
+  "use_img_on_chain": false
+}

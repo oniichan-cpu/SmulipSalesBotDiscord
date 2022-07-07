@@ -75,7 +75,7 @@ def get_image(tokenId):
         images.append(img.get('src'))
     return images[0]
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=5)
 async def sales():
     channel_id = config['channel_id']
     channel = client.get_channel(channel_id)
